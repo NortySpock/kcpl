@@ -61,7 +61,25 @@ class KCPL():
 def getCreds():
     with open("../credentials.json", 'r') as f:
         return json.loads(f.read())
+        
+def runUsingCreds():
+     # Read the credentials.json file
+    creds = getCreds()
+    username = creds["username"]
+    password = creds["password"]
 
+    kcpl = KCPL(username, password)
+    kcpl.login()
+
+    # Get a list of daily readings
+
+    data = kcpl.getUsage()
+    logging.info("Last usage data: " + str(data[-1]))
+    logging.info("Last usage reading: " + str(data[-1]["usage"]))
+
+    # End your session by logging out
+    kcpl.logout()
+        
 if __name__ == "__main__":
     # Read the credentials.json file
     creds = getCreds()
