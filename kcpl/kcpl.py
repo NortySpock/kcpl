@@ -4,11 +4,13 @@ from bs4 import BeautifulSoup
 from datetime import date, timedelta
 import logging
 
-logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s -  - %(message)s", level=logging.INFO)
+logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s -  - %(message)s", level=logging.DEBUG)
 
 day_before_yesterday = date.today() - timedelta(days=2)
 yesterday = date.today() - timedelta(days=1)
 today = date.today()
+last_week = date.today() - timedelta(weeks=1)
+
 
 class KCPL():
     def __init__(self, username, password):
@@ -23,6 +25,7 @@ class KCPL():
         self.accountSummaryUrl = "https://www.evergy.com/ma/my-account/account-summary"
         self.accountDashboardUrl = "https://www.evergy.com/api/account/{accountNum}/dashboard/current"
         self.usageDataUrl = "https://www.evergy.com/api/report/usage/{premiseId}?interval={query_scale}&from={start}&to={end}"
+
 
     def login(self):
         self.session = requests.Session()
@@ -40,6 +43,16 @@ class KCPL():
             dashboardData = self.session.get(self.accountDashboardUrl.format(accountNum=self.accountNumber)).json()
             self.premiseId = dashboardData["addresses"][0]["premiseId"]
             self.loggedIn = self.accountNumber is not None and self.premiseId is not None
+
+    def getPremiseId(self):
+        if (not self.loggedIn):
+            raise Exception("Cannot request getPremiseId when not loggedIn")
+        if (not self.premiseId):
+            raise Exception("premiseId had unexpected value:"+str(self.premiseId))
+        return self.premiseId
+
+    def setPremiseId(self,newPremiseId):
+        self.premiseId = newPremiseId
 
     def logout(self):
         logging.info("Logging out")
@@ -61,7 +74,7 @@ class KCPL():
 def getCreds():
     with open("../credentials.json", 'r') as f:
         return json.loads(f.read())
-        
+
 def runUsingCreds():
      # Read the credentials.json file
     creds = getCreds()
@@ -79,7 +92,7 @@ def runUsingCreds():
 
     # End your session by logging out
     kcpl.logout()
-        
+
 if __name__ == "__main__":
     # Read the credentials.json file
     creds = getCreds()

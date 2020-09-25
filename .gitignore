@@ -51,3 +51,10 @@ fabric.properties
 credentials.json
 __pycache__/
 venv/
+
+#other data I want to exclude
+*.txt
+*.json
+*.db
+*.exe
+

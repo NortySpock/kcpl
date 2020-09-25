@@ -1,5 +1,9 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort, make_response
 from kcpl import kcpl
+
+fakedb = []
+# import sqlite3
+# conn = sqlite3.connect('example.db')
 
 app = Flask(__name__)
 
@@ -7,7 +11,8 @@ app = Flask(__name__)
 def main():
     return 'Hello, World!'
     
-def @app.route('/api/evergy/getLastFewDays/<daysToLookback>')
+@app.route('/api/evergy/getLastFewDays/<int:daysToLookBack>')
+def getLastFewDaysFromEnergyCompany(daysToLookBack):
     kcpl = KCPL()
     kcpl.login()
 
@@ -19,4 +24,20 @@ def @app.route('/api/evergy/getLastFewDays/<daysToLookback>')
 
     # End your session by logging out
     kcpl.logout()
-        
+   
+@app.route('/api/local/insertOne/', methods=['POST'])  
+@app.route('/api/local/insertOne', methods=['POST'])
+def insertOne():
+  if not request.json or not 'title' in request.json:
+    abort(400)
+  fakedb.append(request.json)
+  return  make_response( jsonify({'success':True}),200 )
+    
+
+@app.route('/api/local/getLastFewDays/<int:daysToLookBack>')
+def getLastFewDaysFromLocalDB(daysToLookBack):
+  return [x for x in fakedb]
+  
+@app.route('/api/local/getAllFromDB/')  
+def getAllFromLocalDB():
+    return jsonify(fakedb)
