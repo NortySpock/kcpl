@@ -75,23 +75,25 @@ def getCreds():
     with open("../credentials.json", 'r') as f:
         return json.loads(f.read())
 
-def runUsingCreds():
+def getUsageAcrossDateRangeUsingCredFile(beginDate,endDate):
      # Read the credentials.json file
-    creds = getCreds()
-    username = creds["username"]
-    password = creds["password"]
+    try:
+        creds = getCreds()
+        username = creds["username"]
+        password = creds["password"]
 
-    kcpl = KCPL(username, password)
-    kcpl.login()
+        kcpl = KCPL(username, password)
+        kcpl.login()
 
-    # Get a list of daily readings
+        # Get a list of daily readings
 
-    data = kcpl.getUsage()
-    logging.info("Last usage data: " + str(data[-1]))
-    logging.info("Last usage reading: " + str(data[-1]["usage"]))
+        data = getUsage(beginDate,endDate, query_scale="d")        
 
+    finally:
     # End your session by logging out
-    kcpl.logout()
+        kcpl.logout()
+    
+    return data
 
 if __name__ == "__main__":
     # Read the credentials.json file
