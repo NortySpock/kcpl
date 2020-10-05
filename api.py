@@ -5,10 +5,6 @@ import json
 
 import sqlite3
 
-fakedb = []
-# import sqlite3
-# conn = sqlite3.connect('example.db')
-
 app = Flask(__name__)
 
 @app.route('/')
@@ -246,4 +242,5 @@ def test():
   return my_date.isoformat()
   
 
-
+if __name__ == "__main__": 
+    app.run(host ='0.0.0.0', port = 5000, debug = True) 

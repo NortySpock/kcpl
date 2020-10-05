@@ -58,3 +58,6 @@ venv/
 *.db
 *.exe
 
+build/
+kcpl.egg-info/
+dist/

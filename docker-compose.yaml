@@ -1,0 +1,13 @@
+version: "2.4"
+
+services:
+  kcpl-api:
+    container_name: kcpl-api
+    mem_limit: 256M
+    image: kcpl-api:latest
+    ports:
+      - "5001:5000"
+    # Volumes store your data between container upgrades
+    volumes:
+       - '/media/SPIN/home/pi/kcpl:/app'
+    restart: unless-stopped
