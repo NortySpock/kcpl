@@ -26,7 +26,7 @@ def getLastFewDaysFromEnergyCompanyAPIAndStore(daysToLookBack):
     data = getLastFewDaysFromEnergyCompany(daysToLookBack)
     dbInsertList(data)
     return make_response( "",204 )
-    
+
     
 def getLastFewDaysFromEnergyCompany(daysToLookBack):
     earliest_date = date.today() - timedelta(days=daysToLookBack)
@@ -51,6 +51,45 @@ def getLastFewDaysFromEnergyCompany(daysToLookBack):
         con.logout()
 
     
+    return data
+
+    
+@app.route('/api/evergy/getDateRangeAndStore')
+@app.route('/api/evergy/getDateRangeAndStore/')   
+def getDateRangeFromEnergyCompanyAPIAndStore():
+    start_date = request.args.get("start")
+    end_date = request.args.get("end")
+    data = getDateRangeFromEnergyCompany(start_date,end_date)
+    dbInsertList(data)
+    return make_response( "",204 )
+
+def getDateRangeFromEnergyCompany(start,end):
+    if(start > end):
+      #swap
+      temp = end
+      end = start 
+      start = temp
+    
+    
+    creds = dict() 
+
+    with open("credentials.json", 'r') as f:
+        creds = json.loads(f.read())
+
+    username = creds["username"]
+    password = creds["password"]
+
+    con = kcpl.KCPL(username, password)
+    try:
+        con.login()
+
+        # Get a list of daily readings
+        data = con.getUsage(start,end,query_scale="d")
+
+    finally:
+    # End your session by logging out
+        con.logout()
+
     return data
     
    
