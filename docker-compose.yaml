@@ -6,7 +6,7 @@ services:
     mem_limit: 256M
     image: kcpl-api:latest
     ports:
-      - "5001:5000"
+      - "5000:5000"
     # Volumes store your data between container upgrades
     volumes:
        - '/media/SPIN/home/pi/kcpl:/app'

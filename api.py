@@ -8,9 +8,15 @@ import sqlite3
 app = Flask(__name__)
 
 @app.route('/')
-def main():
-    return 'Hello, World!'
-    
+def top():
+    return make_response( "Hello World!",200)
+
+@app.route('/search')
+@app.route('/search/')
+def search():
+    array_of_search_options = ["Last_7_Days","Last_14_Days","Last_30_Days","Last_60_Days","Last_90_Days"]
+    return make_response(jsonify(array_of_search_options,200)
+
 @app.route('/api/evergy/getLastFewDays/<int:daysToLookBack>')
 @app.route('/api/evergy/getLastFewDays/<int:daysToLookBack>/')
 def getLastFewDaysFromEnergyCompanyAPI(daysToLookBack):
