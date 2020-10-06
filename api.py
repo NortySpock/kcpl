@@ -8,14 +8,41 @@ import sqlite3
 app = Flask(__name__)
 
 @app.route('/')
-def top():
+def grafana_top():
     return make_response( "Hello World!",200)
 
 @app.route('/search')
 @app.route('/search/')
-def search():
+def grafana_search():
     array_of_search_options = ["Last_7_Days","Last_14_Days","Last_30_Days","Last_60_Days","Last_90_Days"]
-    return make_response(jsonify(array_of_search_options,200)
+    return make_response(jsonify(array_of_search_options,200))
+    
+@app.route('/query')
+@app.route('/query/')
+def grafana_query():
+    if not (request and request.is_json):
+        print("Aborting!",flush=True)
+        abort(400)
+        
+    search_target = request.json["target"]
+    try:
+        print("search_target:",jsonify(search_target),flush=True)
+        if(search_target == "Last_7_Days"):
+            con = sqlite3.connect("energy_usage.db")
+            cur = con.cursor()        
+            sqlstatement = "SELECT date('now', '-7 days');"
+            cur.execute(sqlstatement)
+
+    except sqlite3.error as error:
+        print("failed to insert data into sqlite table", error, flush=True)
+    except sqlite3.warning as warning:
+        print("warning on insert data into sqlite table", error, flush=True)
+    finally:
+        if (con):
+            con.close()
+            print("the sqlite connection is closed")
+            
+    return make_response(jsonify(request.json,400))
 
 @app.route('/api/evergy/getLastFewDays/<int:daysToLookBack>')
 @app.route('/api/evergy/getLastFewDays/<int:daysToLookBack>/')
@@ -108,23 +135,7 @@ def insertOne():
       con = sqlite3.connect("energy_usage.db")
       cur = con.cursor()
         
-        # {
-        # "avgDemand": 0.0,
-        # "avgTemp": 68.716667,
-        # "billDate": "2020-09-24T00:00:00",
-        # "billEnd": "0001-01-01T00:00:00",
-        # "billStart": "0001-01-01T00:00:00",
-        # "cost": 31.2612,
-        # "date": "9/24/2020",
-        # "demand": 3.156,
-        # "isPartial": false,
-        # "maxTemp": 79.9,
-        # "minTemp": 57.2,
-        # "peakDateTime": "8:45 p.m.",
-        # "peakDemand": 3.156,
-        # "period": "Thursday",
-        # "usage": 28.1052
-        # }
+      
       print(str(request.json),flush=True)
         
       
