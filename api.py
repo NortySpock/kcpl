@@ -17,9 +17,16 @@ def grafana_search():
     array_of_search_options = ["Last_7_Days","Last_14_Days","Last_30_Days","Last_60_Days","Last_90_Days"]
     return make_response(jsonify(array_of_search_options),200)
 
-@app.route('/query')
-@app.route('/query/')
-def grafana_query():
+@app.route('/query', methods=['GET', 'POST'])
+def grafana_query_short():
+    return grafana_query(request)
+
+
+@app.route('/query/', methods=['GET', 'POST'])
+def grafana_query_long():
+    return grafana_query(request)
+
+def grafana_query(request):
     if not (request and request.is_json):
         print("Request is not json, aborting. Consider setting the header Content-Type=application/json",flush=True)
         abort(400)
