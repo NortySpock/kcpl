@@ -1,4 +1,5 @@
 from datetime import datetime, date,  timedelta
+from time import time, mktime,strftime
 from flask import Flask, jsonify, request, abort, make_response
 from kcpl import kcpl
 import json
@@ -11,8 +12,14 @@ app = Flask(__name__)
 def grafana_top():
     return make_response( "Hello World!",200)
 
-@app.route('/search')
-@app.route('/search/')
+@app.route('/search', methods=['GET', 'POST'])
+def grafana_search_short():
+    return grafana_search()
+
+@app.route('/search/', methods=['GET', 'POST'])
+def grafana_search_long():
+    return grafana_search()
+
 def grafana_search():
     array_of_search_options = ["Last_7_Days","Last_14_Days","Last_30_Days","Last_60_Days","Last_90_Days"]
     return make_response(jsonify(array_of_search_options),200)
@@ -34,33 +41,39 @@ def grafana_query(request):
 
     try:
         targets = request.json["targets"]
+        returnList = []
         for item in targets:
             if item["type"] == "timeserie":
                 if item["target"] == "Last_7_Days":
                     dbresults = getLastFewDaysFromLocalDB(7)
                     returnObject = {"target:":item["target"], "datapoints": []}
                     for dbitem in dbresults:
-                        returnObject["datapoints"].append(dbitem["energy_use"])
-                    return make_response(jsonify(returnObject),200)
+                        returnObject["datapoints"].append([dbitem[1],mktime(datetime.strptime(dbitem[0], "%Y-%m-%d").timetuple())*1000])
+                    returnList.append(returnObject)
+
                 if item["target"] ==  "Last_14_Days":
                     dbresults = getLastFewDaysFromLocalDB(14)
                     returnObject = {"target:":item["target"], "datapoints": []}
                     for dbitem in dbresults:
-                        returnObject["datapoints"].append(dbitem["energy_use"])
-                    return make_response(jsonify(returnObject),200)
+                        returnObject["datapoints"].append([dbitem[1],mktime(datetime.strptime(dbitem[0], "%Y-%m-%d").timetuple())*1000])
+                    returnList.append(returnObject)
+
             if item["type"] == "table":
                 if item["target"] == "Last_7_Days":
                     dbresults = getLastFewDaysFromLocalDB(7)
                     returnObject = {"columns:":[{"text":"Date of Use","type":"date"}, {"text":"energy use (kWh)","type":"number"}],"rows":[],"type":"table"}
                     for dbitem in dbresults:
-                        returnObject["rows"].append([dbitem["date_of_use"],dbitem["energy_use"]])
-                    return make_response(jsonify(returnObject),200)
+                        returnObject["rows"].append([dbitem[0],dbitem[1]])
+                    returnList.append(returnObject)
+
                 if item["target"] ==  "Last_14_Days":
                     dbresults = getLastFewDaysFromLocalDB(14)
                     returnObject = {"columns:":[{"text":"Date of Use","type":"date"}, {"text":"energy use (kWh)","type":"number"}],"rows":[],"type":"table"}
                     for dbitem in dbresults:
-                        returnObject["rows"].append([dbitem["date_of_use"],dbitem["energy_use"]])
-                    return make_response(jsonify(returnObject),200)
+                        returnObject["rows"].append([dbitem[0],dbitem[1]])
+                    returnList.append(returnObject)
+
+        return make_response(jsonify(returnList),200)
 
 
 
