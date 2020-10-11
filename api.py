@@ -309,7 +309,7 @@ def getLastFewDaysFromLocalDB(daysToLookBack):
 
       earliest_date = date.today() - timedelta(days=daysToLookBack)
 
-      sqlstatement = "select date_of_use, energy_use,peak_power_demand,peak_time,high_temp_F,low_temp_F,avg_temp_F from history where active = 1 and date_of_use>='" +  str(earliest_date.isoformat())+"' ORDER BY rowid"
+      sqlstatement = "select date_of_use, energy_use,peak_power_demand,peak_time,high_temp_F,low_temp_F,avg_temp_F from history where active = 1 and date_of_use>='" +  str(earliest_date.isoformat())+"' ORDER BY date_of_use"
 
       cur.execute(sqlstatement)
       results = cur.fetchall()
