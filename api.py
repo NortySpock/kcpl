@@ -37,18 +37,30 @@ def grafana_query(request):
         for item in targets:
             if item["type"] == "timeserie":
                 if item["target"] == "Last_7_Days":
-                    print("timeserie => Last_7_Days",flush=True)
-                    return make_response("timeserie => Last_7_Days",200)
+                    dbresults = getLastFewDaysFromLocalDB(7)
+                    returnObject = {"target:":item["target"], "datapoints": []}
+                    for dbitem in dbresults:
+                        returnObject["datapoints"].append(dbitem["energy_use"])
+                    return make_response(jsonify(returnObject),200)
                 if item["target"] ==  "Last_14_Days":
-                    print("timeserie => Last_14_Days",flush=True)
-                    return make_response("timeserie => Last_14_Days",200)
+                    dbresults = getLastFewDaysFromLocalDB(14)
+                    returnObject = {"target:":item["target"], "datapoints": []}
+                    for dbitem in dbresults:
+                        returnObject["datapoints"].append(dbitem["energy_use"])
+                    return make_response(jsonify(returnObject),200)
             if item["type"] == "table":
                 if item["target"] == "Last_7_Days":
-                    print("table => Last_7_Days",flush=True)
-                    return make_response("table => Last_7_Days",200)
+                    dbresults = getLastFewDaysFromLocalDB(7)
+                    returnObject = {"columns:":[{"text":"Date of Use","type":"date"}, {"text":"energy use (kWh)","type":"number"}],"rows":[],"type":"table"}
+                    for dbitem in dbresults:
+                        returnObject["rows"].append([dbitem["date_of_use"],dbitem["energy_use"]])
+                    return make_response(jsonify(returnObject),200)
                 if item["target"] ==  "Last_14_Days":
-                    print("table => Last_7_Days",flush=True)
-                    return make_response("table => Last_14_Days",200)
+                    dbresults = getLastFewDaysFromLocalDB(14)
+                    returnObject = {"columns:":[{"text":"Date of Use","type":"date"}, {"text":"energy use (kWh)","type":"number"}],"rows":[],"type":"table"}
+                    for dbitem in dbresults:
+                        returnObject["rows"].append([dbitem["date_of_use"],dbitem["energy_use"]])
+                    return make_response(jsonify(returnObject),200)
 
 
 
@@ -77,7 +89,7 @@ def grafana_query(request):
 @app.route('/annotations')
 @app.route('/annotations/')
 def grafana_annotations():
-    return make_response(jsonify("annotations are not yet supported"),500)
+    return make_response( "annotations are not yet supported",500)
 
 @app.route('/api/evergy/getLastFewDays/<int:daysToLookBack>')
 @app.route('/api/evergy/getLastFewDays/<int:daysToLookBack>/')
@@ -250,9 +262,13 @@ def dbInsertList(list):
 
 @app.route('/api/local/getLastFewDays/<int:daysToLookBack>')
 @app.route('/api/local/getLastFewDays/<int:daysToLookBack>/')
-def getLastFewDaysFromLocalDB(daysToLookBack):
+def getLastFewDays(daysToLookBack):
+    results = getLastFewDaysFromLocalDB(daysToLookBack)
+    if len(results) == 0:
+        return make_response('', 204)
+    return jsonify(results)
 
-  print("daysToLookBack:"+str(daysToLookBack),flush=True)
+def getLastFewDaysFromLocalDB(daysToLookBack):
   try:
       con = sqlite3.connect("energy_usage.db")
       cur = con.cursor()
@@ -270,11 +286,8 @@ def getLastFewDaysFromLocalDB(daysToLookBack):
   finally:
     if (con):
         con.close()
-        print("The SQLite connection is closed")
 
-  if len(results) == 0:
-    return make_response('', 204)
-  return jsonify(results)
+  return results
 
 @app.route('/api/local/getAllFromDB')
 @app.route('/api/local/getAllFromDB/')
