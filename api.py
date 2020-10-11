@@ -58,6 +58,27 @@ def grafana_query(request):
                         returnObject["datapoints"].append([dbitem[1],mktime(datetime.strptime(dbitem[0], "%Y-%m-%d").timetuple())*1000])
                     returnList.append(returnObject)
 
+                if item["target"] ==  "Last_30_Days":
+                    dbresults = getLastFewDaysFromLocalDB(30)
+                    returnObject = {"target:":item["target"], "datapoints": []}
+                    for dbitem in dbresults:
+                        returnObject["datapoints"].append([dbitem[1],mktime(datetime.strptime(dbitem[0], "%Y-%m-%d").timetuple())*1000])
+                    returnList.append(returnObject)
+
+                if item["target"] ==  "Last_60_Days":
+                    dbresults = getLastFewDaysFromLocalDB(60)
+                    returnObject = {"target:":item["target"], "datapoints": []}
+                    for dbitem in dbresults:
+                        returnObject["datapoints"].append([dbitem[1],mktime(datetime.strptime(dbitem[0], "%Y-%m-%d").timetuple())*1000])
+                    returnList.append(returnObject)
+
+                if item["target"] ==  "Last_90_Days":
+                    dbresults = getLastFewDaysFromLocalDB(90)
+                    returnObject = {"target:":item["target"], "datapoints": []}
+                    for dbitem in dbresults:
+                        returnObject["datapoints"].append([dbitem[1],mktime(datetime.strptime(dbitem[0], "%Y-%m-%d").timetuple())*1000])
+                    returnList.append(returnObject)
+
             if item["type"] == "table":
                 if item["target"] == "Last_7_Days":
                     dbresults = getLastFewDaysFromLocalDB(7)
