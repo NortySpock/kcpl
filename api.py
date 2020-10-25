@@ -139,6 +139,7 @@ def getLastFewDaysFromEnergyCompanyAPI(daysToLookBack):
 def getLastFewDaysFromEnergyCompanyAPIAndStore(daysToLookBack):
     data = getLastFewDaysFromEnergyCompany(daysToLookBack)
     dbInsertList(data)
+    cleanupLastFewDaysDB(daysToLookBack+6) #arbitrary number padded to make sure we cover a day or two of partial results
     return make_response( "",204 )
 
 
@@ -347,7 +348,7 @@ def getAllFromLocalDB():
 @app.route('/api/local/cleanup')
 @app.route('/api/local/cleanup/')
 @app.route('/api/local/deactivateDupes/')
-def cleanupDB():
+def cleanupAllDB():
   try:
     sqlstatement = ""
     with open('cleanup_script.sql') as f:
@@ -365,6 +366,31 @@ def cleanupDB():
         con.close()
         print("The SQLite connection is closed")
   return make_response('', 204)
+
+@app.route('/api/local/cleanup/lastFewDays/<int:daysToLookBack>')
+@app.route('/api/local/cleanup/lastFewDays/<int:daysToLookBack>/')
+def cleanupLastFewDaysDB(daysToLookBack):
+  try:
+    sqlstatement = "WITH const(lookback) as (SELECT date(MAX(date_of_use),'-" + str(daysToLookBack) +" days') AS lookback FROM history) \
+    UPDATE history SET active=0\
+    WHERE active = 1 and date_of_use >= (select lookback from const) and\
+    rowid NOT IN (   SELECT MAX(rowid)   FROM history   WHERE date_of_use >= (select lookback from const) GROUP BY date_of_use )"
+
+
+    con = sqlite3.connect("energy_usage.db")
+    cur = con.cursor()
+
+    cur.execute(sqlstatement)
+
+  except sqlite3.Error as error:
+    print("Failed to cleanup sqlite table", error, flush=True )
+  finally:
+    if (con):
+        con.close()
+        print("The SQLite connection is closed")
+  return make_response('', 204)
+
+
 
 @app.route('/api/local/importLocalCSV/')
 def importLocalCSV():
